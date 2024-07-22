@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'next/router';
 
 const initialIcons = [
   { id: 'icon-1', title: 'Portfolio 1', link: '/portfolio1' },
@@ -12,7 +12,7 @@ const initialIcons = [
   { id: 'icon-4', title: 'Portfolio 4', link: '/portfolio4' }
 ];
 
-const Desktop = () => {
+const Home = () => {
   const [icons, setIcons] = useState(initialIcons);
   const router = useRouter();
 
@@ -32,13 +32,6 @@ const Desktop = () => {
 
   return (
     <div className="relative w-full h-[100vh]">
-      <Image 
-        alt="배경화면"
-        src="/images/desktop.jpg"
-        layout="fill"
-        objectFit="cover"
-        quality={100}
-      />
       <DragDropContext onDragEnd={onDragEnd}>
         <Droppable droppableId="desktop" direction="horizontal">
           {(provided) => (
@@ -72,4 +65,4 @@ const Desktop = () => {
   );
 };
 
-export default Desktop;
+export default Home;
