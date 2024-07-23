@@ -2,32 +2,23 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd';
 import { useRouter } from 'next/navigation';
 
+
+
 const initialIcons = [
-  { id: 'icon-1', title: 'Portfolio 1', link: '/portfolio1' },
-  { id: 'icon-2', title: 'Portfolio 2', link: '/portfolio2' },
-  { id: 'icon-3', title: 'Portfolio 3', link: '/portfolio3' },
-  { id: 'icon-4', title: 'Portfolio 4', link: '/portfolio4' }
+  { id: 'icon-1', title: 'Internet Browser', type: 'browser' },
+  // 다른 아이콘들을 추가할 수 있습니다.
 ];
 
 const Desktop = () => {
   const [icons, setIcons] = useState(initialIcons);
-  const router = useRouter();
+  const [openBrowser, setOpenBrowser] = useState(false);
 
-  const onDragEnd = (result: DropResult) => {
-    if (!result.destination) return;
-
-    const newIcons = Array.from(icons);
-    const [movedIcon] = newIcons.splice(result.source.index, 1);
-    newIcons.splice(result.destination.index, 0, movedIcon);
-
-    setIcons(newIcons);
-  };
-
-  const handleIconClick = (link: string) => {
-    router.push(link);
+  const handleIconDoubleClick = (type: string) => {
+    if (type === 'browser') {
+      setOpenBrowser(true);
+    }
   };
 
   return (
@@ -39,35 +30,46 @@ const Desktop = () => {
         objectFit="cover"
         quality={100}
       />
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="desktop" direction="horizontal">
-          {(provided) => (
-            <div
-              {...provided.droppableProps}
-              ref={provided.innerRef}
-              className="absolute inset-0 flex flex-wrap p-4"
-            >
-              {icons.map((icon, index) => (
-                <Draggable key={icon.id} draggableId={icon.id} index={index}>
-                  {(provided) => (
-                    <div
-                      ref={provided.innerRef}
-                      {...provided.draggableProps}
-                      {...provided.dragHandleProps}
-                      className="w-20 h-20 m-4 p-2 flex flex-col items-center cursor-pointer bg-white bg-opacity-50 rounded"
-                      onClick={() => handleIconClick(icon.link)}
-                    >
-                      <div className="flex-shrink-0 w-12 h-12 bg-blue-500 rounded mb-2"></div>
-                      <span className="text-sm text-center">{icon.title}</span>
-                    </div>
-                  )}
-                </Draggable>
-              ))}
-              {provided.placeholder}
-            </div>
-          )}
-        </Droppable>
-      </DragDropContext>
+      <div className="absolute inset-0 flex flex-wrap p-4">
+        {icons.map((icon) => (
+          <div
+            key={icon.id}
+            className="w-20 h-20 m-4 p-2 flex flex-col items-center cursor-pointer bg-white bg-opacity-50 rounded"
+            onDoubleClick={() => handleIconDoubleClick(icon.type)}
+          >
+            <div className="flex-shrink-0 w-12 h-12 bg-blue-500 rounded mb-2"></div>
+            <span className="text-sm text-center">{icon.title}</span>
+          </div>
+        ))}
+      </div>
+      {openBrowser && <BrowserWindow onClose={() => setOpenBrowser(false)} />}
+    </div>
+  );
+};
+
+
+const BrowserWindow = ({ onClose }: { onClose: () => void }) => {
+  const [url, setUrl] = useState("https://");
+  const [iframeUrl, setIframeUrl] = useState("");
+
+  const handleGoClick = () => {
+    const validUrl = url.startsWith("http://") || url.startsWith("https://") ? url : `https://${url}`;
+    setIframeUrl(validUrl);
+  };
+
+  return (
+    <div className="absolute top-10 left-10 w-[80vw] h-[80vh] bg-white shadow-lg">
+      <div className="flex justify-between items-center p-2 bg-gray-200">
+        <input 
+          type="text" 
+          value={url} 
+          onChange={(e) => setUrl(e.target.value)} 
+          className="w-full p-2 border rounded text-black"
+        />
+        <button onClick={handleGoClick} className="p-2 bg-blue-500 text-white rounded ml-2">Go</button>
+        <button onClick={onClose} className="p-2 bg-red-500 text-white rounded ml-2">Close</button>
+      </div>
+      <iframe src={iframeUrl} className="w-full h-full" sandbox="allow-scripts allow-same-origin allow-forms allow-popups"></iframe>
     </div>
   );
 };
